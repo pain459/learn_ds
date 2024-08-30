@@ -1,0 +1,2 @@
+https://www.ibm.com/topics/exploratory-data-analysis
+https://www.geeksforgeeks.org/what-is-exploratory-data-analysis/
