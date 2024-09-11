@@ -1,0 +1,12 @@
+# Create env
+#
+# conda create --prefix ./env pandas numpy matplotlib scikit-learn
+#
+#                                                                                                                                                                                                       
+# To activate this environment, use                                                                                                                                                                     
+#                                                                                                                                                                                                       
+#     $ conda activate /home/ravik/src_git/learn_ds/sample_project/env                                                                                                                                  
+#                                                                                                                                                                                                       
+# To deactivate an active environment, use                                                                                                                                                              
+#                                                                                                                                                                                                       
+#     $ conda deactivate
