@@ -10,3 +10,10 @@
 # To deactivate an active environment, use                                                                                                                                                              
 #                                                                                                                                                                                                       
 #     $ conda deactivate
+
+
+# To create an yml file from end env for distribution
+# conda env export --prefix env > environment.yml
+
+# Create an environment from yml file.
+# conda env create --file environment.yml --name env_from_file
