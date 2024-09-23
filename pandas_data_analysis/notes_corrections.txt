@@ -1,0 +1,13 @@
+# Previous code (will error)
+car_sales.mean()
+ 
+# New code (update to the pandas library)
+car_sales.mean(numeric_only=True)
+
+
+# Previous code (will error)
+car_sales["Price"] = car_sales["Price"].str.replace('[\$\,\.]', '')
+ 
+# New code 
+# Change Price column to integers
+car_sales["Price"] = car_sales["Price"].str.replace('[\$\,\.]', '', regex=True)
