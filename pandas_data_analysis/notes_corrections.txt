@@ -11,3 +11,6 @@ car_sales["Price"] = car_sales["Price"].str.replace('[\$\,\.]', '')
 # New code 
 # Change Price column to integers
 car_sales["Price"] = car_sales["Price"].str.replace('[\$\,\.]', '', regex=True)
+
+We might need to escape each of the \ in regex as well. Working version is as below.
+# car_sales['Price'] = car_sales['Price'].replace('[\\$\\,\\.]', '', regex=True).astype(int)
