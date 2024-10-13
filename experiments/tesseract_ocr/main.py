@@ -8,7 +8,7 @@ import os
 os.environ['TESSDATA_PREFIX'] = '/usr/share/tesseract-ocr/5/tessdata/'
 
 # Load the image from which you want to extract text
-image_path = 'test_image.png'  # replace with your image file path
+image_path = 'img102.png'  # replace with your image file path
 image = Image.open(image_path)
 
 # Extract text from the image
