@@ -162,3 +162,5 @@ cython_debug/
 #.idea/
 
 menv/
+
+/home/ravik/src_git/learn_ds/experiments/issue_predictor/results
