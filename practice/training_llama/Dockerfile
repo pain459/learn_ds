@@ -8,6 +8,8 @@ RUN apt-get update && apt-get install -y \
     git \
     openssh-server \
     wget \
+    vim \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Set up SSH for accessing the container
@@ -16,13 +18,13 @@ RUN echo 'root:password' | chpasswd
 RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
 EXPOSE 22
 
-# Clone LLaMA and install dependencies
-RUN git clone https://github.com/facebookresearch/llama.git /opt/llama
-WORKDIR /opt/llama
-RUN pip3 install -r requirements.txt
+# Copy the requirements file and install dependencies
+COPY requirements.txt /opt/llama/requirements.txt
+RUN pip3 install -r /opt/llama/requirements.txt
 
-# Install additional libraries for handling PDFs
-RUN pip3 install PyMuPDF transformers sentence-transformers
+# Clone LLaMA repository if it does not already exist
+RUN [ ! -d "/opt/llama" ] && git clone https://github.com/facebookresearch/llama.git /opt/llama || echo "LLaMA repository already exists."
+WORKDIR /opt/llama
 
 # Run SSH service
 CMD ["/usr/sbin/sshd", "-D"]

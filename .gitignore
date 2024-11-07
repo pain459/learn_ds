@@ -163,3 +163,4 @@ cython_debug/
 
 menv/
 /experiments/issue_predictor/results
+.conda

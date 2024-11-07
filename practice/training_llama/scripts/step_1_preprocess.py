@@ -1,15 +1,15 @@
 import requests
-import PyPDF2
-from transformers import AutoTokenizer
 import fitz  # PyMuPDF
+from transformers import AutoTokenizer
 
 # Function to fetch and clean text from a Wikipedia page
 def fetch_wikipedia_page(page_title):
-    # url = f"https://en.wikipedia.org/api/rest_v1/page/plain_text/{page_title}"
-    url = f"https://en.wikipedia.org/w/index.php?title={page_title}&action=raw"
+    # Wikipedia API endpoint for page summary
+    url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{page_title}"
     response = requests.get(url)
     if response.status_code == 200:
-        return response.text
+        data = response.json()
+        return data.get("extract", "No content found.")
     else:
         print(f"Error fetching Wikipedia page: {response.status_code}")
         return None
