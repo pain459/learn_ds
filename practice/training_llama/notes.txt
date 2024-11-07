@@ -1,0 +1,11 @@
+# Build the Docker container:
+
+docker build -t llama-container .
+
+# Run the container, exposing SSH on port 2222:
+
+docker run -d -p 2222:22 --name llama_project llama-container
+
+# SSH into the container (password: password):
+
+ssh root@localhost -p 2222
