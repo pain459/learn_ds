@@ -5,7 +5,8 @@ import fitz  # PyMuPDF
 
 # Function to fetch and clean text from a Wikipedia page
 def fetch_wikipedia_page(page_title):
-    url = f"https://en.wikipedia.org/api/rest_v1/page/plain_text/{page_title}"
+    # url = f"https://en.wikipedia.org/api/rest_v1/page/plain_text/{page_title}"
+    url = f"https://en.wikipedia.org/w/index.php?title={page_title}&action=raw"
     response = requests.get(url)
     if response.status_code == 200:
         return response.text
@@ -44,7 +45,7 @@ def preprocess_document(source_type, source_path_or_title):
 
 # Example Usage
 # To preprocess a Wikipedia page
-tokens = preprocess_document("wikipedia", "Machine_learning")
+tokens = preprocess_document("wikipedia", "Visakhapatnam")
 
 # To preprocess a PDF
 # tokens = preprocess_document("pdf", "your_document.pdf")

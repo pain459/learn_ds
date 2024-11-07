@@ -1,0 +1,28 @@
+from transformers import AutoModelForCausalLM, Trainer, TrainingArguments
+
+# Load LLaMA model and tokenizer (assuming it's compatible)
+model = AutoModelForCausalLM.from_pretrained("facebook/llama")
+
+# Define training arguments
+training_args = TrainingArguments(
+    output_dir="./output",
+    per_device_train_batch_size=1,
+    num_train_epochs=3,
+    save_steps=10,
+    logging_dir="./logs",
+)
+
+# Fine-tune LLaMA on our document
+def fine_tune_llama(tokens):
+    trainer = Trainer(
+        model=model,
+        args=training_args,
+        train_dataset=tokens,
+    )
+    trainer.train()
+
+# Example usage:
+# Run the preprocessing script first to get `tokens`
+# from preprocess import preprocess_document
+# tokens = preprocess_document("wikipedia", "Machine_learning")
+# fine_tune_llama(tokens)
