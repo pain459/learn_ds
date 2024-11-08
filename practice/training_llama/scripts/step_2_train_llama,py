@@ -49,6 +49,10 @@ def fine_tune_llama(tokens):
         data_collator=data_collator
     )
     trainer.train()
+    
+    # Save the model after training
+    trainer.save_model("./output/final_model")
+
 
 # Example usage
 if __name__ == "__main__":
