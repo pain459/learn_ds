@@ -1,9 +1,9 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-# Specify the path to the specific checkpoint directory
-model_path = "/opt/llama/output/checkpoint-3/"  # Update to the checkpoint directory
-model = AutoModelForCausalLM.from_pretrained(model_path)
-tokenizer = AutoTokenizer.from_pretrained(model_path)
+# Specify the path to the saved model and tokenizer
+model_path = "/opt/llama/output/final_model"  # Updated to final model directory
+model = AutoModelForCausalLM.from_pretrained(model_path, local_files_only=True)
+tokenizer = AutoTokenizer.from_pretrained(model_path, local_files_only=True)
 
 # Define the query function
 def query_model(prompt, max_length=150):

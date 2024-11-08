@@ -1,7 +1,6 @@
 import torch
 from torch.utils.data import Dataset
-from transformers import AutoModelForCausalLM, AutoTokenizer
-from transformers import Trainer, TrainingArguments
+from transformers import AutoModelForCausalLM, AutoTokenizer, Trainer, TrainingArguments
 from transformers import DataCollatorForLanguageModeling
 
 # Define a custom Dataset class
@@ -20,7 +19,7 @@ class TextDataset(Dataset):
         }
 
 # Load the LLaMA model and tokenizer
-model_name = "meta-llama/Llama-3.2-1B"
+model_name = "meta-llama/Llama-3.2-1B"  # Update to the exact model you're using
 model = AutoModelForCausalLM.from_pretrained(model_name)
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
@@ -34,6 +33,7 @@ training_args = TrainingArguments(
     num_train_epochs=3,
     save_steps=10,
     logging_dir="./logs",
+    overwrite_output_dir=True  # Overwrite the output directory if it exists
 )
 
 # Fine-tune LLaMA on our document
@@ -50,15 +50,16 @@ def fine_tune_llama(tokens):
     )
     trainer.train()
     
-    # Save the model after training
-    trainer.save_model("./output/final_model")
-
+    # Explicitly save the final model and tokenizer after training
+    final_model_dir = "./output/final_model"
+    trainer.save_model(final_model_dir)  # Saves the model
+    tokenizer.save_pretrained(final_model_dir)  # Saves the tokenizer
 
 # Example usage
 if __name__ == "__main__":
     # Assume preprocess_document function is available from preprocess.py
     from preprocess import preprocess_document
-    tokens = preprocess_document("wikipedia", "Visakhapatnam")
+    tokens = preprocess_document("wikipedia", "Machine_learning")
     
     # Check if tokens were fetched successfully
     if tokens:
