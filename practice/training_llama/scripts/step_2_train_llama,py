@@ -50,10 +50,11 @@ def fine_tune_llama(tokens):
     )
     trainer.train()
     
-    # Explicitly save the final model and tokenizer after training
-    final_model_dir = "./output/final_model"
-    trainer.save_model(final_model_dir)  # Saves the model
-    tokenizer.save_pretrained(final_model_dir)  # Saves the tokenizer
+    # Get the latest checkpoint directory
+    latest_checkpoint_dir = "./output/checkpoint-3"
+    
+    # Explicitly save the tokenizer in the checkpoint directory
+    tokenizer.save_pretrained(latest_checkpoint_dir)
 
 # Example usage
 if __name__ == "__main__":
