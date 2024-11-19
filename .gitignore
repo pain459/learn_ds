@@ -165,3 +165,4 @@ menv/
 /experiments/issue_predictor/results
 .conda
 /practice/analysis/*.xlsx
+/practice/analysis/*.csv
