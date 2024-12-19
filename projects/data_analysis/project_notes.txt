@@ -19,3 +19,5 @@ df['logged_date_sample'] = df['logged_date_sample'].dt.tz_localize('Asia/Kolkata
 df['logged_date_sample'] = df['logged_date_sample'].dt.tz_convert('US/Eastern')
 
 df.head(5)
+
+df['logged_date_sample'].isna().any()  # this concludes there are no NaN values
