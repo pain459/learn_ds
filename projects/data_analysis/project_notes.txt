@@ -1,0 +1,21 @@
+import pandas as pd
+
+df = pd.read_csv('data.csv')
+df.head(5)
+
+# Renaming columns (count should match). The number should match.
+df.columns = ['col1', 'col2', 'col3']
+df.dtypes
+
+# Convert the time stamp
+
+# Convert to datetime object with IST timezone
+df['logged_date_sample'] = pd.to_datetime(df['logged_date_sample'], format='%m/%d/%Y %H:%M:%S IST')
+
+# Localize the datetime to IST
+df['logged_date_sample'] = df['logged_date_sample'].dt.tz_localize('Asia/Kolkata')
+
+# Convert to ET timezone
+df['logged_date_sample'] = df['logged_date_sample'].dt.tz_convert('US/Eastern')
+
+df.head(5)
