@@ -15,8 +15,8 @@ ticket_id_start = 1000
 
 # Generate current datetime
 def generate_datetime():
-    start_date = datetime(2024, 12, 20, 15, 0)
-    random_minutes = random.randint(0, 60 * 24 * 30)  # Random within 30 days
+    start_date = datetime(2024, 1, 1, 0, 0)
+    random_minutes = random.randint(0, 60 * 24 * 300)  # Random within 30 days
     return start_date + timedelta(minutes=random_minutes)
 
 # Generate ticket data
