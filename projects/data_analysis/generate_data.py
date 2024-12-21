@@ -3,7 +3,7 @@ import random
 from datetime import datetime, timedelta
 
 # Specifications
-tickets = 1000  # Number of tickets to generate
+tickets = 1000000  # Number of tickets to generate
 clients = ["A", "B", "C", "D", "E"]
 services = ["A1", "B1", "C1", "D1", "E1", "F1"]
 statuses = ["assigned", "awaiting_response", "closed"]
