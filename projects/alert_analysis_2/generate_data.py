@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 # Configuration
 clients = [f"c{i}" for i in range(1, 9)]  # Clients c1 to c8
-start_date = datetime(2024, 1, 1, 0, 0, 0)  # Start date
+start_date = datetime(2023, 1, 1, 0, 0, 0)  # Start date
 end_date = datetime(2024, 12, 31, 23, 59, 0)  # End date
 output_file = "client_events.csv"
 
