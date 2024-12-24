@@ -26,6 +26,12 @@ def process_data(data):
     # Rename columns for clarity
     monthly_data.rename(columns={'year_month': 'month'}, inplace=True)
 
+    # Rearrange data to interleave same months from different years
+    monthly_data['month_order'] = pd.to_datetime(monthly_data['month']).dt.month
+    monthly_data['year'] = pd.to_datetime(monthly_data['month']).dt.year
+    monthly_data.sort_values(by=['month_order', 'year'], inplace=True)
+    monthly_data.drop(columns=['month_order', 'year'], inplace=True)
+
     return monthly_data
 
 # Write processed data to CSV
