@@ -48,9 +48,10 @@ def generate_january_incidents():
     """
     Generate incident rows for January 2025 based on the rules:
      - day_in_week: Monday=1, ..., Sunday=7
-     - random times between 08:00 and (say) 18:00 for first_symptom
+     - random times between 08:00 and 14:00 for first_symptom
      - random offsets for create, detect, mitigate, close
-     - various random picks for department, issue_type, impacted_clients
+     - random picks for department, issue_type
+     - impacted_clients now allows multiple clients (semicolon-separated)
     """
     current_incident_id = START_INCIDENT_ID
     # Start date: 2025-01-01
@@ -98,7 +99,14 @@ def generate_january_incidents():
             # Random picks
             department = random.choice(DEPARTMENTS)
             issue_type = random.choice(ISSUE_TYPES)
-            impacted_client = random.choice(CLIENTS)
+            
+            # PICK MULTIPLE CLIENTS
+            # We'll randomly pick between 1 and 4 distinct clients
+            num_impacted = random.randint(1, 4)
+            impacted_clients_list = random.sample(CLIENTS, num_impacted)
+            # Sort them for consistency and join with semicolon
+            impacted_clients_list.sort()
+            impacted_clients = ";".join(str(c) for c in impacted_clients_list)
 
             # Week number
             week_number = get_week_number(d.day)
@@ -120,7 +128,7 @@ def generate_january_incidents():
                 "day_in_week": day_of_week,
                 "quarter_of_year": 1,  # January -> Q1
                 "month_of_year": 1,    # January
-                "impacted_clients": impacted_client
+                "impacted_clients": impacted_clients
             }
             all_rows.append(row)
 
@@ -156,10 +164,10 @@ if __name__ == "__main__":
         "impacted_clients"
     ]
 
-    # Print CSV to stdout (you can redirect to a file, e.g. > january_incidents.csv)
-    writer = csv.DictWriter(open("january_incidents.csv", "w", newline=''), fieldnames=fieldnames)
-    writer.writeheader()
-    for row in data:
-        writer.writerow(row)
+    with open("january_incidents.csv", "w", newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in data:
+            writer.writerow(row)
 
     print(f"CSV generated with {len(data)} incidents.")
