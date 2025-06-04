@@ -166,3 +166,4 @@ menv/
 .conda
 /practice/analysis/*.xlsx
 /practice/analysis/*.csv
+*.gguf
