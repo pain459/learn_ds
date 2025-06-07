@@ -1,21 +1,39 @@
 import os
 import faiss
 import pickle
+from functools import lru_cache
 from sentence_transformers import SentenceTransformer
 import requests
 
-model = SentenceTransformer("all-MiniLM-L6-v2")
 INDEX_FILE = "vector_store.index"
 MAPPING_FILE = "index_mapping.pkl"
 OLLAMA_URL = "http://ollama:11434/api/generate"
 
-def search_and_respond(question: str, dataset_name: str = None):
-    if not os.path.exists(INDEX_FILE) or not os.path.exists(MAPPING_FILE):
-        raise Exception("No training data found.")
 
-    index = faiss.read_index(INDEX_FILE)
+@lru_cache()
+def get_model():
+    return SentenceTransformer("all-MiniLM-L6-v2")
+
+
+@lru_cache()
+def get_index():
+    if not os.path.exists(INDEX_FILE):
+        raise FileNotFoundError("Vector index not found.")
+    return faiss.read_index(INDEX_FILE)
+
+
+@lru_cache()
+def get_mapping():
+    if not os.path.exists(MAPPING_FILE):
+        raise FileNotFoundError("Mapping file not found.")
     with open(MAPPING_FILE, "rb") as f:
-        mapping = pickle.load(f)
+        return pickle.load(f)
+
+
+def search_and_respond(question: str, dataset_name: str = None) -> str:
+    model = get_model()
+    index = get_index()
+    mapping = get_mapping()
 
     q_vec = model.encode([question])
     D, I = index.search(q_vec, 10)
@@ -44,7 +62,29 @@ Question:
     response = requests.post(OLLAMA_URL, json={
         "model": "llama3",
         "prompt": prompt,
-        "stream": False
+        "stream": False,
+        "options": {
+            "num_predict": 2048  # or dynamically configured
+        }
     })
 
     return response.json().get("response", "[No response]")
+
+
+def search_context_for_prompt(query: str, dataset: str = None, top_k: int = 5) -> str:
+    model = get_model()
+    index = get_index()
+    mapping = get_mapping()
+
+    query_vector = model.encode([query])
+    D, I = index.search(query_vector, top_k)
+
+    context_chunks = []
+    for idx in I[0]:
+        if idx >= len(mapping):
+            continue
+        chunk, chunk_dataset = mapping[idx]
+        if dataset is None or chunk_dataset == dataset:
+            context_chunks.append(chunk)
+
+    return "\n".join(context_chunks)

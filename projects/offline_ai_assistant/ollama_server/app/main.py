@@ -7,6 +7,9 @@ from fastapi import Form
 from .query import search_and_respond
 from pathlib import Path
 from .train import list_datasets_with_counts, purge_dataset
+from fastapi.responses import StreamingResponse
+from .config_loader import get_num_predict_for
+import datetime
 
 app = FastAPI()
 # templates = Jinja2Templates(directory="templates")
@@ -72,3 +75,49 @@ async def purge_dataset_handler(request: Request, dataset: str = Form(...)):
             "error": str(e),
             "datasets": datasets
         })
+
+@app.post("/ask_stream")
+async def ask_stream(request: Request, question: str = Form(...), dataset: str = Form(None)):
+    from .query import search_context_for_prompt
+    context = search_context_for_prompt(question, dataset)
+
+    full_prompt = f"""Use the below context to answer the question.
+Context:
+{context}
+
+Question:
+{question}
+"""
+
+    num_predict = get_num_predict_for(dataset or "default")
+
+    def generate():
+        import requests
+        response = requests.post("http://ollama:11434/api/generate", json={
+            "model": "llama3",
+            "prompt": full_prompt,
+            "stream": True,
+            "options": {
+                "num_predict": num_predict
+            }
+        }, stream=True)
+
+        log_content = ""
+        for line in response.iter_lines():
+            if line:
+                text = line.decode("utf-8")
+                log_content += text + "\n"
+                try:
+                    import json
+                    yield json.loads(text).get("response", "")
+                except Exception:
+                    pass
+
+        # Save log
+        timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        filename = f"logs/response_{dataset or 'general'}_{timestamp}.log"
+        os.makedirs("logs", exist_ok=True)
+        with open(filename, "w") as f:
+            f.write(log_content)
+
+    return StreamingResponse(generate(), media_type="text/plain")
