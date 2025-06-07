@@ -24,14 +24,36 @@ def process_file(file_path):
     chunks = chunk_text(text)
 
     vectors = model.encode(chunks)
-    index.add(vectors)
-    mapping.extend([(chunk, dataset_name) for chunk in chunks])
 
-    faiss.write_index(index, index_path)
+    # Always load fresh from disk
+    if os.path.exists(index_path) and os.path.exists(mapping_path):
+        index = faiss.read_index(index_path)
+        with open(mapping_path, "rb") as f:
+            mapping = pickle.load(f)
+    else:
+        index = faiss.IndexFlatL2(384)
+        mapping = []
+
+    # Remove existing entries with same dataset_name
+    filtered_mapping = [(chunk, tag) for chunk, tag in mapping if tag != dataset_name]
+    filtered_texts = [chunk for chunk, tag in filtered_mapping]
+    new_index = faiss.IndexFlatL2(384)
+
+    if filtered_texts:
+        filtered_vectors = model.encode(filtered_texts)
+        new_index.add(filtered_vectors)
+
+    # Add new dataset entries
+    new_index.add(vectors)
+    filtered_mapping.extend([(chunk, dataset_name) for chunk in chunks])
+
+    # Save new index + mapping
+    faiss.write_index(new_index, index_path)
     with open(mapping_path, "wb") as f:
-        pickle.dump(mapping, f)
+        pickle.dump(filtered_mapping, f)
 
-    return f"Added {len(chunks)} chunks to dataset: {dataset_name}"
+    return f"Replaced dataset '{dataset_name}' with {len(chunks)} new chunks."
+
 
 def list_datasets_with_counts():
     if not os.path.exists(mapping_path):
