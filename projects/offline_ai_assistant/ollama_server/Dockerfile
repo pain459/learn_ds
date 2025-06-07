@@ -5,9 +5,10 @@ COPY app/ ./app/
 COPY templates/ ./templates/
 COPY requirements.txt .
 
-RUN pip install --no-cache-dir \
-    fastapi uvicorn jinja2 python-multipart \
-    sentence-transformers faiss-cpu pandas pymupdf pyyaml
-RUN pip install --no-cache-dir -r requirements.txt
+# RUN pip install --no-cache-dir \
+#     fastapi uvicorn jinja2 python-multipart \
+#     sentence-transformers faiss-cpu pandas pymupdf pyyaml
+# RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -1,9 +1,18 @@
 import yaml
+import os
 
-with open("app/config.yaml", "r") as f:
-    config = yaml.safe_load(f)
+# __all__ = ["get_num_predict"]
 
-def get_num_predict_for(dataset_name: str) -> int:
-    if dataset_name in config.get("datasets", {}):
-        return config["datasets"][dataset_name].get("num_predict", config["default"]["num_predict"])
-    return config["default"]["num_predict"]
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+path = os.path.join(BASE_DIR, "config.yaml")
+
+def load_config():
+    with open(path, "r") as f:
+        return yaml.safe_load(f)
+
+_config = load_config()
+
+def get_num_predict_for(dataset: str | None) -> int:
+    if dataset and dataset in _config.get("datasets", {}):
+        return _config["datasets"][dataset].get("num_predict", _config["default"]["num_predict"])
+    return _config["default"]["num_predict"]

@@ -10,6 +10,7 @@ from .train import list_datasets_with_counts, purge_dataset
 from fastapi.responses import StreamingResponse
 from .config_loader import get_num_predict_for
 import datetime
+from pydantic import BaseModel
 
 app = FastAPI()
 # templates = Jinja2Templates(directory="templates")
@@ -19,13 +20,27 @@ templates = Jinja2Templates(directory=str(TEMPLATE_DIR))
 UPLOAD_DIR = "/tmp/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+# @app.get("/", response_class=HTMLResponse)
+# async def index(request: Request):
+#     datasets = list_datasets_with_counts()
+#     return templates.TemplateResponse("chat.html", {
+#         "request": request,
+#         "datasets": datasets
+#     })
+
+
+class StreamQuery(BaseModel):
+    question: str
+    dataset: str | None = None
+
 @app.get("/", response_class=HTMLResponse)
-async def index(request: Request):
-    datasets = list_datasets_with_counts()
-    return templates.TemplateResponse("upload.html", {
+def home(request: Request):
+    from .train import list_datasets_with_counts
+    return templates.TemplateResponse("chat.html", {
         "request": request,
-        "datasets": datasets
+        "datasets": list_datasets_with_counts()
     })
+
 
 @app.post("/train")
 async def train(request: Request, file: UploadFile = File(...)):
@@ -34,12 +49,12 @@ async def train(request: Request, file: UploadFile = File(...)):
         with open(file_path, "wb") as f:
             f.write(await file.read())
         result = process_file(file_path)
-        return templates.TemplateResponse("upload.html", {
+        return templates.TemplateResponse("chat.html", {
             "request": request,
             "message": f"Training complete: {result}"
         })
     except Exception as e:
-        return templates.TemplateResponse("upload.html", {
+        return templates.TemplateResponse("chat.html", {
             "request": request,
             "error": str(e)
         })
@@ -47,14 +62,14 @@ async def train(request: Request, file: UploadFile = File(...)):
 async def ask_question(request: Request, question: str = Form(...), dataset: str = Form(None)):
     try:
         answer = search_and_respond(question, dataset_name=dataset)
-        return templates.TemplateResponse("upload.html", {
+        return templates.TemplateResponse("chat.html", {
             "request": request,
             "answer": answer,
             "question": question,
             "dataset": dataset
         })
     except Exception as e:
-        return templates.TemplateResponse("upload.html", {
+        return templates.TemplateResponse("chat.html", {
             "request": request,
             "error": str(e)
         })
@@ -64,23 +79,25 @@ async def purge_dataset_handler(request: Request, dataset: str = Form(...)):
     try:
         message = purge_dataset(dataset)
         datasets = list_datasets_with_counts()  # Refresh list after purge
-        return templates.TemplateResponse("upload.html", {
+        return templates.TemplateResponse("chat.html", {
             "request": request,
             "message": message,
             "datasets": datasets
         })
     except Exception as e:
-        return templates.TemplateResponse("upload.html", {
+        return templates.TemplateResponse("chat.html", {
             "request": request,
             "error": str(e),
             "datasets": datasets
         })
 
 @app.post("/ask_stream")
-async def ask_stream(request: Request, question: str = Form(...), dataset: str = Form(None)):
+async def ask_stream(request: StreamQuery):
     from .query import search_context_for_prompt
-    context = search_context_for_prompt(question, dataset)
+    question = request.question
+    dataset = request.dataset
 
+    context = search_context_for_prompt(question, dataset)
     full_prompt = f"""Use the below context to answer the question.
 Context:
 {context}

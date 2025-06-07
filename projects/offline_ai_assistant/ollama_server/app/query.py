@@ -4,6 +4,7 @@ import pickle
 from functools import lru_cache
 from sentence_transformers import SentenceTransformer
 import requests
+from .config_loader import get_num_predict_for
 
 INDEX_FILE = "vector_store.index"
 MAPPING_FILE = "index_mapping.pkl"
@@ -64,7 +65,7 @@ Question:
         "prompt": prompt,
         "stream": False,
         "options": {
-            "num_predict": 2048  # or dynamically configured
+            "num_predict": get_num_predict_for(dataset_name)
         }
     })
 
