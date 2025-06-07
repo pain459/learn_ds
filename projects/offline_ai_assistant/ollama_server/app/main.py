@@ -6,6 +6,7 @@ from .train import process_file
 from fastapi import Form
 from .query import search_and_respond
 from pathlib import Path
+from .train import list_datasets_with_counts, purge_dataset
 
 app = FastAPI()
 # templates = Jinja2Templates(directory="templates")
@@ -17,7 +18,11 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
-    return templates.TemplateResponse("upload.html", {"request": request})
+    datasets = list_datasets_with_counts()
+    return templates.TemplateResponse("upload.html", {
+        "request": request,
+        "datasets": datasets
+    })
 
 @app.post("/train")
 async def train(request: Request, file: UploadFile = File(...)):
@@ -49,4 +54,21 @@ async def ask_question(request: Request, question: str = Form(...), dataset: str
         return templates.TemplateResponse("upload.html", {
             "request": request,
             "error": str(e)
+        })
+@app.post("/purge")
+async def purge_dataset_handler(request: Request, dataset: str = Form(...)):
+    datasets = list_datasets_with_counts()
+    try:
+        message = purge_dataset(dataset)
+        datasets = list_datasets_with_counts()  # Refresh list after purge
+        return templates.TemplateResponse("upload.html", {
+            "request": request,
+            "message": message,
+            "datasets": datasets
+        })
+    except Exception as e:
+        return templates.TemplateResponse("upload.html", {
+            "request": request,
+            "error": str(e),
+            "datasets": datasets
         })

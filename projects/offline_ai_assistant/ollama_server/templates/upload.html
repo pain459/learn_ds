@@ -9,18 +9,21 @@
         <input name="file" type="file" accept=".txt,.pdf,.csv"/>
         <button type="submit">Train</button>
     </form>
+
     {% if message %}
         <p style="color: green;">{{ message }}</p>
     {% endif %}
     {% if error %}
         <p style="color: red;">Error: {{ error }}</p>
     {% endif %}
+
     <h2>Ask a Question</h2>
     <form action="/ask" method="post">
-        <input name="question" type="text" placeholder="Ask something..." style="width: 300px;" />
+        <input name="question" type="text" placeholder="Ask something..." style="width: 300px;" required />
         <input name="dataset" type="text" placeholder="(Optional) dataset name" style="width: 200px;" />
         <button type="submit">Ask</button>
     </form>
+
     {% if question %}
         <p><strong>Q:</strong> {{ question }}</p>
         {% if dataset %}
@@ -30,5 +33,20 @@
     {% if answer %}
         <p><strong>Answer:</strong> {{ answer }}</p>
     {% endif %}
+
+    {% if datasets %}
+        <h3>Available Datasets</h3>
+        <ul>
+        {% for ds, count in datasets %}
+            <li><strong>{{ ds }}</strong> — {{ count }} chunks</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+
+    <h2>Purge Dataset</h2>
+    <form action="/purge" method="post">
+        <input name="dataset" type="text" placeholder="Enter dataset name to purge" style="width: 300px;" required />
+        <button type="submit" onclick="return confirm('Are you sure you want to permanently delete this dataset?')">Purge</button>
+    </form>
 </body>
 </html>

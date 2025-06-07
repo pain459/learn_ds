@@ -32,3 +32,41 @@ def process_file(file_path):
         pickle.dump(mapping, f)
 
     return f"Added {len(chunks)} chunks to dataset: {dataset_name}"
+
+def list_datasets_with_counts():
+    if not os.path.exists(mapping_path):
+        return []
+
+    with open(mapping_path, "rb") as f:
+        mapping = pickle.load(f)
+
+    dataset_counts = {}
+    for _, tag in mapping:
+        dataset_counts[tag] = dataset_counts.get(tag, 0) + 1
+
+    return sorted(dataset_counts.items())
+
+def purge_dataset(dataset_name: str):
+    if not os.path.exists(index_path) or not os.path.exists(mapping_path):
+        raise Exception("No training data found.")
+
+    with open(mapping_path, "rb") as f:
+        mapping = pickle.load(f)
+
+    remaining = [(chunk, tag) for chunk, tag in mapping if tag != dataset_name]
+    removed_count = len(mapping) - len(remaining)
+
+    if removed_count == 0:
+        raise Exception(f"No dataset named '{dataset_name}' found.")
+
+    new_index = faiss.IndexFlatL2(384)
+    if remaining:
+        texts = [chunk for chunk, _ in remaining]
+        vectors = model.encode(texts)
+        new_index.add(vectors)
+
+    faiss.write_index(new_index, index_path)
+    with open(mapping_path, "wb") as f:
+        pickle.dump(remaining, f)
+
+    return f"✅ Removed {removed_count} entries from dataset '{dataset_name}'"
