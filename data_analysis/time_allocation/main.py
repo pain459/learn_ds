@@ -11,12 +11,43 @@ def validate_csv_columns(df, required_columns, filename):
         raise Exception(f"Missing columns {missing} in {filename}. Found columns: {actual_columns}")
 
 def main():
-    if len(sys.argv) != 3:
-        print("Usage: python time_allocation.py <start_date YYYYMMDD> <end_date YYYYMMDD>")
-        sys.exit(1)
+    if '--help' in sys.argv or '-h' in sys.argv:
+        print("""
+------------------------------------------------------------
+Time Allocation Script
 
-    from_date = int(sys.argv[1])
-    to_date = int(sys.argv[2])
+Usage:
+    python time_allocation.py <start_date YYYYMMDD> <end_date YYYYMMDD>
+
+Example:
+    python time_allocation.py 20250701 20250731
+
+This script requires 5 CSV files in the current folder:
+    1. team.csv      - Columns: id, name
+    2. budgets.csv   - Columns: task, budget
+    3. logged.csv    - Columns: id, task, logged
+    4. holidays.csv  - Columns: day, holiday
+    5. leaves.csv    - Columns: id, leaves  (summarized)
+
+It validates inputs, calculates allocations, and exports:
+    time_allocations.csv
+
+------------------------------------------------------------
+        """)
+        sys.exit(0)
+
+    if len(sys.argv) != 3:
+        print("ERROR: Missing arguments.")
+        print("Run with --help for usage instructions.")
+        sys.exit(1)
+    # if len(sys.argv) != 3:
+    #     print("Usage: python time_allocation.py <start_date YYYYMMDD> <end_date YYYYMMDD>")
+    #     sys.exit(1)
+
+    # from_date = int(sys.argv[1])
+    # to_date = int(sys.argv[2])
+    from_date_input = sys.argv[1]
+    to_date_input = sys.argv[2]
 
     # ---------------------------
     # Load input files with validation
@@ -47,8 +78,23 @@ def main():
     # ---------------------------
     # Date range
     # ---------------------------
-    from_dt = datetime.strptime(str(from_date), "%Y%m%d")
-    to_dt = datetime.strptime(str(to_date), "%Y%m%d")
+    # from_dt = datetime.strptime(str(from_date), "%Y%m%d")
+    # to_dt = datetime.strptime(str(to_date), "%Y%m%d")
+    # total_days = (to_dt - from_dt).days + 1
+    try:
+        from_dt = datetime.strptime(from_date_input, "%Y%m%d")
+        to_dt = datetime.strptime(to_date_input, "%Y%m%d")
+    except ValueError:
+        print("ERROR: Dates must be in YYYYMMDD format and be valid calendar dates.")
+        sys.exit(1)
+
+    from_date = int(from_date_input)
+    to_date = int(to_date_input)
+
+    if from_dt > to_dt:
+        print("ERROR: Start date must be before or equal to end date.")
+        sys.exit(1)
+
     total_days = (to_dt - from_dt).days + 1
 
     # ---------------------------
@@ -148,7 +194,7 @@ def main():
     # ---------------------------
     output_file = 'time_allocations.csv'
     report_df.to_csv(output_file, index=False)
-    print(f"\n✅ Allocation exported to {output_file}")
+    print(f"\nAllocation exported to {output_file}")
 
 if __name__ == '__main__':
     main()
